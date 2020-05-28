@@ -1,0 +1,6 @@
+some_key: "test"
+another_key: 1234
+sub_object:
+  something: "a"
+  something_else: 1234
+last_key: "{LAST_KEY:default value}"

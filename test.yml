@@ -4,3 +4,4 @@ sub_object:
   something: "a"
   something_else: 1234
 last_key: "{LAST_KEY:default value}"
+last_key_with_number: "{LAST_KEY:54}"

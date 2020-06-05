@@ -1,10 +1,9 @@
-package gocfg_test
+package gocfg
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/caioeverest/gocfg"
 	"github.com/caioeverest/gocfg/reader"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +22,7 @@ type SubStructExample struct {
 }
 
 var (
-	inputOk = reader.FileContent{
+	inputOkMapper = reader.FileContent{
 		"First":              "exemple",
 		"Second":             "some value",
 		"SomeBooleanExample": true,
@@ -37,7 +36,7 @@ var (
 
 func TestFill(t *testing.T) {
 	var c = Example{}
-	err := gocfg.Fill(inputOk, &c)
+	err := fill(inputOkMapper, &c)
 	assert.Nil(t, err)
 	fmt.Printf("%+v", c)
 }

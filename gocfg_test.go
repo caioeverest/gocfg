@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caioeverest/gocfg/reader"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,10 +15,11 @@ func TestLoad(t *testing.T) {
 			SomeThing     string `cfg:"something"`
 			SomethingElse int    `cfg:"something_else"`
 		} `cfg:"sub_object"`
-		LastKey string `cfg:"last_key"`
+		LastKey           string `cfg:"last_key"`
+		LastKeyWithNumber uint   `cfg:"last_key_with_number"`
 	}{}
 
-	err := Load(&testObject, reader.YAML, "test.yml")
+	err := Load(&testObject, YAML, "test.yml")
 	assert.Nil(t, err)
 	fmt.Printf("%+v", testObject)
 }

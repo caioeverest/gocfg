@@ -12,8 +12,9 @@ func TestLoad(t *testing.T) {
 		SomeKey    string `cfg:"some_key"`
 		AnotherKey int    `cfg:"another_key"`
 		SubObject  struct {
-			SomeThing     string `cfg:"something"`
-			SomethingElse int    `cfg:"something_else"`
+			SomeThing                      string  `cfg:"something"`
+			SomethingElse                  int     `cfg:"something_else"`
+			SomethingElseWithInterpolation float64 `cfg:"something_else_with_interpolation"`
 		} `cfg:"sub_object"`
 		LastKey           string `cfg:"last_key"`
 		LastKeyWithNumber uint   `cfg:"last_key_with_number"`

@@ -3,5 +3,6 @@ another_key: 1234
 sub_object:
   something: "a"
   something_else: 1234
+  something_else_with_interpolation: "{SOMETHING_ELSE_WITH_INTERPOLATION:3432.8}"
 last_key: "{LAST_KEY:default value}"
-last_key_with_number: "{LAST_KEY:54}"
+last_key_with_number: "{LAST_KEY_WITH_NUMBER:54}"

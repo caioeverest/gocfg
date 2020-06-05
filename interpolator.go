@@ -2,6 +2,7 @@ package gocfg
 
 import (
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -16,7 +17,14 @@ const (
 func interpolate(content reader.FileContent) (output reader.FileContent) {
 	output = make(reader.FileContent)
 	for key, valueRaw := range content {
-		if value, ok := valueRaw.(string); ok {
+		if reflect.TypeOf(valueRaw).Kind() == reflect.Map {
+			sub, converted := convertSubStruct(valueRaw)
+			if !converted {
+				output[key] = valueRaw
+			} else {
+				output[key] = interpolate(sub)
+			}
+		} else if value, ok := valueRaw.(string); ok {
 			output[key] = exportValue(value)
 		} else {
 			output[key] = valueRaw

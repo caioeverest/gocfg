@@ -4,6 +4,7 @@
 prepare:
 	go get -v -t -d ./...
 
+.PHONY: static-analysis
 static-analysis:
 	go vet ./...
 

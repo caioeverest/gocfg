@@ -1,6 +1,7 @@
 package gocfg
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 
@@ -52,35 +53,14 @@ func fill(content reader.FileContent, inputAddr interface{}) (err error) {
 				fieldValElem   = blockValueTrue.Elem().Field(i)
 			)
 
-			if fieldStruct.Type.Elem() == reflect.TypeOf(rawVal) {
-				value = reflect.ValueOf(rawVal)
-				initializer := reflect.New(value.Type())
-				initializer.Elem().Set(value)
-				fieldValElem.Set(initializer)
-				continue
-			}
-
-			if reflect.TypeOf(rawVal).Kind() != reflect.String {
-				return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
-			}
-
 			if value, err = interpolationConverter(fieldStruct.Type.Elem().Kind(), rawVal); err != nil {
 				return err
 			}
 
-			initializer := reflect.New(fieldStruct.Type)
+			initializer := reflect.New(fieldStruct.Type.Elem())
 			initializer.Elem().Set(value)
 			fieldValElem.Set(initializer)
 		default:
-			if fieldStruct.Type == reflect.TypeOf(rawVal) {
-				fieldVal.Set(reflect.ValueOf(rawVal))
-				continue
-			}
-
-			if reflect.TypeOf(rawVal).Kind() != reflect.String {
-				return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
-			}
-
 			value, err := interpolationConverter(fieldStruct.Type.Kind(), rawVal)
 			if err != nil {
 				return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
@@ -116,7 +96,7 @@ func getParams(f reflect.StructField) (alias string, required bool) {
 }
 
 func interpolationConverter(kind reflect.Kind, rawvalue interface{}) (out reflect.Value, err error) {
-	v := rawvalue.(string)
+	v := fmt.Sprintf("%v", rawvalue)
 
 	switch kind {
 	case reflect.Bool:

@@ -7,16 +7,16 @@ import (
 )
 
 const (
-	ENV = iota
+	ENV reader.Type = iota -1
 	YAML
 	JSON
 	TOML
 )
 
-//It start's the gocfg process, setting the structure used as reference and the type of the configuration:
-//- Environment variables is gocfg.ENV or 0
-//- Yaml file is gocfg.YAML or 1
-//if no file name is informed the function will search on the current path for a application.yml
+// It start's the gocfg process, setting the structure used as reference and the type of the configuration:
+// - Environment variables is gocfg.ENV
+// - Yaml file is gocfg.YAML
+// if no file name is informed the function will search on the current path for a application.yml
 func Load(s interface{}, loadType reader.Type, files ...string) (err error) {
 	var (
 		r                   reader.Reader

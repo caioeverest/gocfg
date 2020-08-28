@@ -27,28 +27,66 @@ func fill(content reader.FileContent, inputAddr interface{}) (err error) {
 
 		if rawVal == nil {
 			continue
-		} else if fieldVal.Kind() == reflect.Struct {
-			sub, converted := convertSubStruct(rawVal)
-			if !converted {
+		}
+
+		switch fieldVal.Kind() {
+		case reflect.Struct:
+			var (
+				sub       reader.FileContent
+				converted bool
+			)
+
+			if sub, converted = convertSubStruct(rawVal); !converted {
 				return FailToParseSubObject(key)
 			}
+
 			if err = fill(sub, fieldVal.Addr().Interface()); err != nil {
 				return
 			}
-		} else {
-			if fieldStruct.Type != reflect.TypeOf(rawVal) {
-				if reflect.TypeOf(rawVal).Kind() == reflect.String {
-					value, err := interpolationConverter(fieldStruct.Type.Kind(), rawVal)
-					if err != nil {
-						return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
-					}
-					fieldVal.Set(value)
-				} else {
-					return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
-				}
-			} else {
-				fieldVal.Set(reflect.ValueOf(rawVal))
+		case reflect.Ptr:
+			var (
+				err            error
+				value          reflect.Value
+				fieldStruct    = reflect.Indirect(reflect.ValueOf(inputAddr)).Type().Field(i)
+				blockValueTrue = reflect.ValueOf(inputAddr)
+				fieldValElem   = blockValueTrue.Elem().Field(i)
+			)
+
+			if fieldStruct.Type.Elem() == reflect.TypeOf(rawVal) {
+				value = reflect.ValueOf(rawVal)
+				initializer := reflect.New(value.Type())
+				initializer.Elem().Set(value)
+				fieldValElem.Set(initializer)
+				continue
 			}
+
+			if reflect.TypeOf(rawVal).Kind() != reflect.String {
+				return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
+			}
+
+			if value, err = interpolationConverter(fieldStruct.Type.Elem().Kind(), rawVal); err != nil {
+				return err
+			}
+
+			initializer := reflect.New(fieldStruct.Type)
+			initializer.Elem().Set(value)
+			fieldValElem.Set(initializer)
+		default:
+			if fieldStruct.Type == reflect.TypeOf(rawVal) {
+				fieldVal.Set(reflect.ValueOf(rawVal))
+				continue
+			}
+
+			if reflect.TypeOf(rawVal).Kind() != reflect.String {
+				return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
+			}
+
+			value, err := interpolationConverter(fieldStruct.Type.Kind(), rawVal)
+			if err != nil {
+				return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
+			}
+
+			fieldVal.Set(value)
 		}
 	}
 

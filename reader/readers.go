@@ -1,6 +1,6 @@
 package reader
 
-type Type int
+type Type int8
 
 type FileContent map[string]interface{}
 

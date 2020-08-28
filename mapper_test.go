@@ -12,6 +12,8 @@ type Example struct {
 	First              string
 	Second             string
 	SomeBooleanExample bool
+	SomePointerInt     *int
+	SomePointerString  *string
 	SomeIntExample     int
 	SubStruct          SubStructExample
 }
@@ -26,6 +28,7 @@ var (
 		"First":              "exemple",
 		"Second":             "some value",
 		"SomeBooleanExample": true,
+		"SomePointerInt":     3123,
 		"SomeIntExample":     58,
 		"SubStruct": reader.FileContent{
 			"SubFirst":  1280.8,

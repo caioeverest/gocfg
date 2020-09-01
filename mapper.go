@@ -1,6 +1,7 @@
 package gocfg
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 
@@ -27,28 +28,45 @@ func fill(content reader.FileContent, inputAddr interface{}) (err error) {
 
 		if rawVal == nil {
 			continue
-		} else if fieldVal.Kind() == reflect.Struct {
-			sub, converted := convertSubStruct(rawVal)
-			if !converted {
-				return FailToParseSubObject(key)
+		}
+
+		switch fieldVal.Kind() {
+		case reflect.Struct:
+			var (
+				sub       reader.FileContent
+				converted bool
+			)
+
+			if sub, converted = convertSubStruct(rawVal); !converted {
+				return failToParseSubObject(key)
 			}
+
 			if err = fill(sub, fieldVal.Addr().Interface()); err != nil {
 				return
 			}
-		} else {
-			if fieldStruct.Type != reflect.TypeOf(rawVal) {
-				if reflect.TypeOf(rawVal).Kind() == reflect.String {
-					value, err := interpolationConverter(fieldStruct.Type.Kind(), rawVal)
-					if err != nil {
-						return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
-					}
-					fieldVal.Set(value)
-				} else {
-					return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
-				}
-			} else {
-				fieldVal.Set(reflect.ValueOf(rawVal))
+		case reflect.Ptr:
+			var (
+				err            error
+				value          reflect.Value
+				fieldStruct    = reflect.Indirect(reflect.ValueOf(inputAddr)).Type().Field(i)
+				blockValueTrue = reflect.ValueOf(inputAddr)
+				fieldValElem   = blockValueTrue.Elem().Field(i)
+			)
+
+			if value, err = interpolationConverter(fieldStruct.Type.Elem().Kind(), rawVal); err != nil {
+				return err
 			}
+
+			initializer := reflect.New(fieldStruct.Type.Elem())
+			initializer.Elem().Set(value)
+			fieldValElem.Set(initializer)
+		default:
+			value, err := interpolationConverter(fieldStruct.Type.Kind(), rawVal)
+			if err != nil {
+				return typeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
+			}
+
+			fieldVal.Set(value)
 		}
 	}
 
@@ -58,7 +76,7 @@ func fill(content reader.FileContent, inputAddr interface{}) (err error) {
 func getValue(content reader.FileContent, key string, required bool) (interface{}, error) {
 	value, ext := content[key]
 	if !ext && required {
-		return nil, RequiredKeyNotFound(key)
+		return nil, requiredKeyNotFound(key)
 	}
 	return value, nil
 }
@@ -78,7 +96,7 @@ func getParams(f reflect.StructField) (alias string, required bool) {
 }
 
 func interpolationConverter(kind reflect.Kind, rawvalue interface{}) (out reflect.Value, err error) {
-	v := rawvalue.(string)
+	v := fmt.Sprintf("%v", rawvalue)
 
 	switch kind {
 	case reflect.Bool:

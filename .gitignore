@@ -130,4 +130,7 @@ tags
 # Coc configuration directory
 .vim
 
+# ignore vs-code config folder
+.vscode/
+
 # End of https://www.gitignore.io/api/go,vim,intellij+all

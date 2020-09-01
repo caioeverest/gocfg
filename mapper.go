@@ -38,7 +38,7 @@ func fill(content reader.FileContent, inputAddr interface{}) (err error) {
 			)
 
 			if sub, converted = convertSubStruct(rawVal); !converted {
-				return FailToParseSubObject(key)
+				return failToParseSubObject(key)
 			}
 
 			if err = fill(sub, fieldVal.Addr().Interface()); err != nil {
@@ -63,7 +63,7 @@ func fill(content reader.FileContent, inputAddr interface{}) (err error) {
 		default:
 			value, err := interpolationConverter(fieldStruct.Type.Kind(), rawVal)
 			if err != nil {
-				return TypeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
+				return typeMismatch(key, reflect.TypeOf(rawVal), fieldStruct.Type)
 			}
 
 			fieldVal.Set(value)
@@ -76,7 +76,7 @@ func fill(content reader.FileContent, inputAddr interface{}) (err error) {
 func getValue(content reader.FileContent, key string, required bool) (interface{}, error) {
 	value, ext := content[key]
 	if !ext && required {
-		return nil, RequiredKeyNotFound(key)
+		return nil, requiredKeyNotFound(key)
 	}
 	return value, nil
 }

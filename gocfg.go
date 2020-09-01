@@ -6,17 +6,18 @@ import (
 	"github.com/caioeverest/gocfg/reader"
 )
 
+//Reader Types
 const (
-	ENV reader.Type = iota -1
+	ENV reader.Type = iota - 1
 	YAML
 	JSON
 	TOML
 )
 
-// It start's the gocfg process, setting the structure used as reference and the type of the configuration:
-// - Environment variables is gocfg.ENV
-// - Yaml file is gocfg.YAML
-// if no file name is informed the function will search on the current path for a application.yml
+//Load start's the gocfg process, setting the structure used as a reference and the type of the configuration:
+//- Environment variables is gocfg.ENV
+//- Yaml file is gocfg.YAML
+//if no file name is informed the function will search on the current path for a application.yml
 func Load(s interface{}, loadType reader.Type, files ...string) (err error) {
 	var (
 		r                   reader.Reader

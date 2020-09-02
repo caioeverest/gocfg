@@ -9,7 +9,7 @@ import (
 type Error string
 
 const (
-	requiredKeyNotFoundTmpl  = "key %s wasn`t found on"
+	requiredKeyNotFoundTmpl  = "key %s wasn't found"
 	typeMismatchTmpl         = "key %s has type %s, but it expects %s"
 	failToParseSubObjectTmpl = "the structure %s encounter problems to be converted into a map"
 )

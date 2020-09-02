@@ -9,7 +9,7 @@ import (
 )
 
 type Example struct {
-	First              string
+	First              string `cfg:"required"`
 	Second             string
 	SomeBooleanExample bool
 	SomePointerInt     *int
@@ -35,6 +35,17 @@ var (
 			"SubSecond": false,
 		},
 	}
+
+	inputWithoutRequiredFieldMapper = reader.FileContent{
+		"Second":             "some value",
+		"SomeBooleanExample": true,
+		"SomePointerInt":     3123,
+		"SomeIntExample":     58,
+		"SubStruct": reader.FileContent{
+			"SubFirst":  1280.8,
+			"SubSecond": false,
+		},
+	}
 )
 
 func TestFill(t *testing.T) {
@@ -42,4 +53,10 @@ func TestFill(t *testing.T) {
 	err := fill(inputOkMapper, &c)
 	assert.Nil(t, err)
 	fmt.Printf("%+v", c)
+}
+
+func TestFill_ShouldErrorWhenRequiredFieldIsMissing(t *testing.T) {
+	var c = Example{}
+	err := fill(inputWithoutRequiredFieldMapper, &c)
+	assert.NotNil(t, err)
 }

@@ -4,8 +4,14 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/caioeverest/gocfg/reader"
+)
+
+const (
+	aliasTag    = "cfg"
+	requiredTag = "required"
 )
 
 func fill(content reader.FileContent, inputAddr interface{}) (err error) {
@@ -82,17 +88,24 @@ func getValue(content reader.FileContent, key string, required bool) (interface{
 }
 
 func getParams(f reflect.StructField) (alias string, required bool) {
-	const (
-		aliasTag    = "cfg"
-		requiredTag = "required"
+	var (
+		tmp []string
+		extAlias bool
+		content string
 	)
-	alias, extAlias := f.Tag.Lookup(aliasTag)
-	_, required = f.Tag.Lookup(requiredTag)
 
-	if !extAlias {
-		alias = f.Name
+	if content, extAlias = f.Tag.Lookup(aliasTag); !extAlias {
+		return f.Name, false
 	}
-	return
+
+	required = strings.Contains(content, requiredTag)
+	tmp = strings.Split(content, ",")
+
+	if required && len(tmp) == 1 {
+		return f.Name, required
+	}
+
+	return tmp[0], required
 }
 
 func interpolationConverter(kind reflect.Kind, rawvalue interface{}) (out reflect.Value, err error) {
